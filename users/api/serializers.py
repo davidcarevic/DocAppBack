@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.serializers import ModelSerializer
 from users.models import Users
 
@@ -13,3 +14,12 @@ class UsersSerializer(ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['user_id'] = user.id
+        token['email'] = user.email
+        token['data'] = user.data
+        return token

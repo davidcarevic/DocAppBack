@@ -1,5 +1,6 @@
 from users.models import Users
-from users.api.serializers import UsersSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from users.api.serializers import UsersSerializer, MyTokenObtainPairSerializer
 from rest_framework.viewsets import ViewSet
 from rest_framework import filters, status, generics, permissions
 from rest_framework.response import Response
@@ -50,3 +51,6 @@ class UsersViewSet(ViewSet):
         users = Users.objects.get(pk=pk)
         users.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
