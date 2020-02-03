@@ -140,7 +140,7 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'knowledge')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'users.api.authentication.UserAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'

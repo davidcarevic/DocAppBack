@@ -5,8 +5,10 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import filters, status, generics, permissions
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+import jwt
 
 class UsersViewSet(ViewSet):
+    authentication_classes = []
     def list(self, request):
         queryset = Users.objects.all()
         serializer = UsersSerializer(queryset, many=True)

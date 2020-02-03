@@ -7,6 +7,8 @@ from main.api.serializers import *
 
 class TeamsViewSet(ViewSet):
     def list(self, request):
+
+        # print('request', request.loged_in_user)
         queryset = Teams.objects.all()
         serializer = TeamsSerializer(queryset, many=True)
         return Response(serializer.data)
