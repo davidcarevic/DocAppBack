@@ -23,8 +23,8 @@ class Roles(models.Model):
 
 class TeamMembers(models.Model):
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, db_column='user_id')
-    role = models.ForeignKey(Teams, on_delete=models.SET_NULL, null=True, db_column='role_id')
-    team = models.ForeignKey(Roles, on_delete=models.CASCADE, db_column='team_id')
+    team = models.ForeignKey(Teams, on_delete=models.SET_NULL, null=True, db_column='team_id')
+    role = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, db_column='role_id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -43,7 +43,7 @@ class Projects(models.Model):
         verbose_name_plural = "Projects"
 
 class TeamProjects(models.Model):
-    team = models.ForeignKey(Roles, on_delete=models.CASCADE, db_column='team_id')
+    team = models.ForeignKey(Teams, on_delete=models.SET_NULL, null=True, db_column='team_id')
     project = models.ForeignKey(Projects, on_delete=models.SET_NULL, null=True, db_column='project_id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

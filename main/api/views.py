@@ -464,3 +464,9 @@ class CommentsViewSet(ViewSet):
         comment = Comments.objects.get(pk=pk)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class UsersTeamsView(ViewSet):
+    def retrieve(self, request, pk=None):
+        queryset = TeamMembers.objects.filter(user=pk)
+        serializer = UsersTeamsSerializer(queryset, many=True)
+        return Response(serializer.data)

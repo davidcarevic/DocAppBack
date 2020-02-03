@@ -62,3 +62,10 @@ class CommentsSerializer(ModelSerializer):
         model = Comments
         fields = '__all__'
         read_only_fields = ['pk', 'created_at', 'updated_at']
+
+
+class UsersTeamsSerializer(ModelSerializer):
+    class Meta:
+        model = TeamMembers
+        fields = ['team']
+        depth = 1
