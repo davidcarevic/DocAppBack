@@ -4,7 +4,6 @@ from users.models import Users
 from main.api.serializers import UsersTeamsPKSerializer
 from main.models import TeamMembers
 
-#Main Category Serializer
 class UsersSerializer(ModelSerializer):
     class Meta:
         model = Users
