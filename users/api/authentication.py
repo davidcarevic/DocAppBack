@@ -9,4 +9,6 @@ class UserAuthentication(JWTAuthentication):
     def authenticate(self, request):
         user = super().authenticate(request)
         token = user[1]
+        request.user_meta = token.payload.get('user')
+
         return user

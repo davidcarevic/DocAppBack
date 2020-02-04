@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from main.models import *
 from main.api.serializers import *
+from users.api.authentication import UserAuthentication
 
 class TeamsViewSet(ViewSet):
     def list(self, request):
@@ -468,7 +469,13 @@ class CommentsViewSet(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class UsersTeamsView(ViewSet):
-    def retrieve(self, request, pk=None):
-        queryset = TeamMembers.objects.filter(user=pk)
+    def list(self, request):
+        # token=request.META['HTTP_AUTHORIZATION'].split(" ")[1]
+        # print("asd",token)
+        # user=UserAuthentication()
+        # print(user)
+        print('user.id', request.user.id)
+        print('user teams', request.user_meta['teams'])
+        queryset = TeamMembers.objects.filter(user_id=request.user.id)
         serializer = UsersTeamsSerializer(queryset, many=True)
         return Response(serializer.data)
