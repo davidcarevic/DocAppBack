@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ViewSet
-from rest_framework import filters, status, generics, permissions
+from rest_framework import status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from main.models import *
@@ -25,6 +25,15 @@ class TeamsViewSet(ViewSet):
         serialized = TeamsSerializer(data=data)
         if serialized.is_valid():
             serialized.save()
+            data = {
+                "user": request.user.id,
+                "team": Teams.objects.last().id,
+                "role": 1
+            }
+            team_member = TeamMembersSerializer(data=data)
+            if team_member.is_valid():
+                team_member.save()
+
             return Response(serialized.data, status=201)
         else:
             return Response(serialized._errors, status=201)

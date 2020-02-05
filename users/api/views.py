@@ -6,12 +6,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 
 
 class UsersViewSet(ViewSet):
-    permission_classes_by_action = {'create': [AllowAny]}
-
+    permission_classes_by_action = {'create': [AllowAny], 'list': [IsAdminUser]}
     def list(self, request):
         queryset = Users.objects.all()
         serializer = UsersSerializer(queryset, many=True)
