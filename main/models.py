@@ -13,6 +13,7 @@ class Teams(models.Model):
         verbose_name_plural = "Teams"
 
 class Roles(models.Model):
+    id = models.IntegerField(primary_key=True, unique=True)
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

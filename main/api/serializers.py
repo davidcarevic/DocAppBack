@@ -1,5 +1,5 @@
 
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from main.models import *
 
 class TeamsSerializer(ModelSerializer):
@@ -73,4 +73,15 @@ class UsersTeamsSerializer(ModelSerializer):
     class Meta:
         model = TeamMembers
         fields = ['team']
+        depth = 1
+
+class ProjectsNameSerializer(ModelSerializer):
+    class Meta:
+        model = Projects
+        fields = ['name']
+
+class TeamsProjectsSerializer(ModelSerializer):
+    class Meta:
+        model = TeamProjects
+        fields = ['project']
         depth = 1

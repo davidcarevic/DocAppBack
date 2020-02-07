@@ -6,11 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
     def insert_data(apps, schema_editor):
         Role = apps.get_model('main', 'Roles')
-        role = Role(name="admin")
+        role = Role(id='0', name="admin")
         role.save()
-        role = Role(name="editor")
+        role = Role(id='10', name="editor")
         role.save()
-        role = Role(name="viewer")
+        role = Role(id='20', name="viewer")
         role.save()
 
     dependencies = [
