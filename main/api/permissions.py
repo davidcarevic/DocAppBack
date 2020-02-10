@@ -1,4 +1,8 @@
 from rest_framework import permissions
+from rest_framework_role_filters.role_filters import RoleFilter
+from restfw_composed_permissions.base import (BaseComposedPermission, And, Or)
+from restfw_composed_permissions.generic.components import (AllowAll, AllowOnlyAuthenticated, AllowOnlySafeHttpMethod)
+from rest_condition import ConditionalPermission, C, And, Or, Not
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     message = 'You must be the owner to edit or delete this object.'

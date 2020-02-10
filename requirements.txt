@@ -10,6 +10,8 @@ django-environ-plus==0.0.3
 django-filter==2.2.0
 django-rest-swagger==2.2.0
 djangorestframework==3.11.0
+djangorestframework-composed-permissions==0.2.1
+djangorestframework-role-filters==0.3.0
 djangorestframework-simplejwt==4.4.0
 idna==2.8
 itypes==1.1.0
@@ -21,6 +23,7 @@ psycopg2-binary==2.8.4
 PyJWT==1.7.1
 pytz==2019.3
 requests==2.22.0
+rest-condition==1.0.3
 simplejson==3.17.0
 six==1.14.0
 sqlparse==0.3.0
