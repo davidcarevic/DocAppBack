@@ -166,10 +166,25 @@ class ProjectsViewSet(ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        data=request.data
-        serialized = ProjectsSerializer(data=data)
+        description = request.data['description']
+        name = request.data['name']
+        teamID = request.data['teamID']
+        newData={ "name": name, "description": description}
+        print("asdasdasdasdasdas")
+        serialized = ProjectsSerializer(data=newData)
+        print(" ser data projects?", serialized)
         if serialized.is_valid():
             serialized.save()
+            print("ID PROJEKTA SERIALIZOVAN: ", serialized["id"].value)
+            data = {
+                "project": serialized["id"].value,
+                "team": teamID,
+            }
+            project_team = TeamProjectsSerializer(data=data)
+            print("p T serzializer, ",project_team)
+            if project_team.is_valid():
+                project_team.save()
+
             return Response(serialized.data, status=201)
         else:
             return Response(serialized._errors, status=201)
