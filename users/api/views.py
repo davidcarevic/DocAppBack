@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 
 
 class UsersViewSet(ViewSet):
-    permission_classes_by_action = {'create': [AllowAny], 'list': [IsAdminUser]}
+    permission_classes_by_action = {'create': [AllowAny]}
     def list(self, request):
         queryset = Users.objects.all()
         serializer = UsersSerializer(queryset, many=True)

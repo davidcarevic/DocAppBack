@@ -19,13 +19,14 @@ class TeamsViewSet(ViewSet):
 
     def create(self, request):
         data=request.data
+        role = Roles.objects.get(name='admin')
         serialized = TeamsSerializer(data=data)
         if serialized.is_valid():
             serialized.save()
             data = {
                 "user": request.user.id,
                 "team": Teams.objects.last().id,
-                "role": 1
+                "role": role.id
             }
             team_member = TeamMembersSerializer(data=data)
             if team_member.is_valid():

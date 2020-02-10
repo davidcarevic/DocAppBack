@@ -23,15 +23,15 @@ class AdminPermission(permissions.BasePermission):
                 return True
         return False
 
-class EditorPermission(permissions.BasePermission):
-    message = 'You have to be editor to perform this action.'
-    safe_methods = ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')
-
-    def has_permission(self, request, view):
-        pass
-
-    def has_object_permission(self, request, view, obj):
-        pass
+# class EditorPermission(permissions.BasePermission):
+#     message = 'You have to be editor to perform this action.'
+#     safe_methods = ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')
+#
+#     def has_permission(self, request, view):
+#         pass
+#
+#     def has_object_permission(self, request, view, obj):
+#         pass
 
 class ViewerPermission(permissions.BasePermission):
     message = 'You are restricted to viewer mode.'
