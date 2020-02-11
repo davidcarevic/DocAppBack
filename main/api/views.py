@@ -407,6 +407,7 @@ class ItemsViewSet(ViewSet):
     def retrieve(self, request, pk=None):
         queryset = Items.objects.all()
         item = get_object_or_404(queryset, pk=pk)
+        print(item.element.category.section.name)
         serializer = ItemsSerializer(item)
         return Response(serializer.data)
 

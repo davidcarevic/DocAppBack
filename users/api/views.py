@@ -74,16 +74,23 @@ def send_email(request):
         from_email=request.user_meta['email'],
         to_emails=request.data['email']
     )
-    if request.data['data']['type'] == 'team':
-        message.dynamic_template_data = {
-            'subject': 'Invitation to team',
-            'text': 'You have been invited to join team %s.' % (request.data['data']['team']),
-            'url': 'http://localhost:3000/register/' + request.data['token']
-        }
-    if request.data['data']['type'] == 'project':
+    try:
+        if request.data['data']['type'] == 'team':
+            message.dynamic_template_data = {
+                'subject': 'Invitation to team',
+                'text': 'You have been invited to join team %s.' % (request.data['data']['team']),
+                'url': 'http://localhost:3000/register/' + request.data['token']
+            }
+        if request.data['data']['type'] == 'project':
+            message.dynamic_template_data = {
+                'subject': 'Invitation to project',
+                'text': F'You have been invited to join a project %s.' % (request.data['data']['project_name']),
+                'url': 'http://localhost:3000/register/' + request.data['token']
+            }
+    except:
         message.dynamic_template_data = {
             'subject': 'Invitation to project',
-            'text': F'You have been invited to join a project %s.' % (request.data['data']['project_name']),
+            'text': F'You have been invited to join Kroon',
             'url': 'http://localhost:3000/register/' + request.data['token']
         }
 
