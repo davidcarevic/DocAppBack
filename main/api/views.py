@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from main.models import *
 from main.api.serializers import *
 from users.api.authentication import UserAuthentication
+from users.api.serializers import MyTokenObtainPairSerializer
 
 class TeamsViewSet(ViewSet):
     def list(self, request):
@@ -15,7 +16,11 @@ class TeamsViewSet(ViewSet):
     def retrieve(self, request, pk=None):
         queryset = TeamProjects.objects.filter(team=pk)
         serialized = TeamsProjectsSerializer(queryset, many=True)
-        return Response(serialized.data)
+        print(request.user_meta)
+        token = MyTokenObtainPairSerializer.get_token(request.user)
+        token['current_team'] = pk
+        # request.user_meta['current_team'] = pk
+        return Response(serialized.data, token)
 
     def create(self, request):
         data=request.data
@@ -170,21 +175,16 @@ class ProjectsViewSet(ViewSet):
         name = request.data['name']
         teamID = request.data['teamID']
         newData={ "name": name, "description": description}
-        print("asdasdasdasdasdas")
         serialized = ProjectsSerializer(data=newData)
-        print(" ser data projects?", serialized)
         if serialized.is_valid():
             serialized.save()
-            print("ID PROJEKTA SERIALIZOVAN: ", serialized["id"].value)
             data = {
                 "project": serialized["id"].value,
                 "team": teamID,
             }
             project_team = TeamProjectsSerializer(data=data)
-            print("p T serzializer, ",project_team)
             if project_team.is_valid():
                 project_team.save()
-
             return Response(serialized.data, status=201)
         else:
             return Response(serialized._errors, status=201)

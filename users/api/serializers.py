@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.serializers import ModelSerializer
-from users.models import Users
+from users.models import Users, EmailInvitation
 from main.api.serializers import UsersTeamsPKSerializer
 from main.models import TeamMembers
 
@@ -26,6 +26,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             'id': user.id,
             'email': user.email,
             'data': user.data,
-            'teams': teams.data
+            'teams': teams.data,
+            'current_team': ''
         }
         return token
+
+class EmailInvitationSerializer(ModelSerializer):
+    class Meta:
+        model = EmailInvitation
+        fields = '__all__'
+        read_only_fields = ['pk', 'created_at', 'updated_at']

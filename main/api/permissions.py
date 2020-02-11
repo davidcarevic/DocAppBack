@@ -20,9 +20,8 @@ class AdminPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # if request.method in permissions.SAFE_METHODS:
         #     return True
-        print(request.user_meta)
         for inst in request.user_meta['teams']:
-            if 19 == inst['id'] and inst['role'] == 0:
+            if request.user_meta['current_team_id'] == inst['id'] and inst['role'] == 0:
                 return True
         return False
 
