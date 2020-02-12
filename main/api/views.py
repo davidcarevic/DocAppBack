@@ -41,7 +41,7 @@ class TeamsViewSet(GenericModelViewSet):
             serialized.save()
             data = {
                 "user": request.user.id,
-                "team": Teams.objects.last().id,
+                "team": serialized.data['id'],
                 "role": role.id
             }
             team_member = TeamMembersSerializer(data=data)
@@ -75,8 +75,9 @@ class ProjectsViewSet(GenericModelViewSet):
         serialized = ProjectsSerializer(data=new_data)
         if serialized.is_valid():
             serialized.save()
+            print(serialized.data["id"])
             data = {
-                "project": serialized["id"].value,
+                "project": serialized.data["id"],
                 "team": team_id,
             }
             project_team = TeamProjectsSerializer(data=data)
