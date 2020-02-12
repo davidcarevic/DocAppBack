@@ -31,7 +31,7 @@ class Users(AbstractBaseUser):
         return self.is_admin
 
     def has_perms(self, perm_list, obj=None):
-        return (self.is_admin and self.is_active)
+        return self.is_admin and self.is_active
 
     def has_module_perms(self, app_label):
         return self.is_admin

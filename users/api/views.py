@@ -42,7 +42,7 @@ class EmailInvitationViewSet(ModelViewSet):
         'retrieve': [AllowAny]
     }
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, **kwargs):
         queryset = EmailInvitation.objects.all()
         invite = get_object_or_404(queryset, token=pk)
         serializer = EmailInvitationSerializer(invite)
@@ -59,7 +59,7 @@ class EmailInvitationViewSet(ModelViewSet):
             send_email(request)
             return Response(serialized.data, status=201)
         else:
-            return Response(serialized._errors, status=201)
+            return Response(serialized.errors, status=201)
 
     def get_permissions(self):
         try:
