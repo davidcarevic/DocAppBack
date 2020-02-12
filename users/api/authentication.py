@@ -7,7 +7,6 @@ class UserAuthentication(JWTAuthentication):
         try:
             token = user[1]
             request.user_meta = token.payload.get('user')
-            request.user_meta['current_team_id'] = None
         except (KeyError, TypeError):
             request.user_meta = {}
 

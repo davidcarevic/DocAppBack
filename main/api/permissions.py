@@ -10,7 +10,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     message = 'You must be the owner to edit or delete this object.'
 
     def has_object_permission(self, request, view, obj):
-        print(request.method)
         if request.method in permissions.SAFE_METHODS:
             return True
         return obj.id == request.user.id
@@ -23,7 +22,7 @@ class AdminPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         for inst in request.user_meta['teams']:
-            if request.user_meta['current_team_id'] == inst['id'] and inst['role'] == 0:
+            if inst['id'] == 1 and inst['role'] == 0:
                 return True
         return False
 
@@ -48,22 +47,23 @@ class ViewerPermission(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS
 
 
-class Permm(permissions.BasePermission):
-    message = 'Ne dam!'
+class Perm(permissions.BasePermission):
+    message = "NO!"
 
     def has_object_permission(self, request, view, obj):
-        # try:
-        print(obj.element.category.section.project.id )
-        return obj.element.category.section.project.id == 10
-
-        # except:
-        #     try:
-        #         return obj.category.section.project.id == 1
-        #     except:
-        #         try:
-        #             return obj.section.project.id == 1
-        #         except:
-        #             try:
-        #                 return obj.project.id == 1
-        #             except:
-        #                 return False
+        try:
+            return obj.element.category.section.project.id == 10
+        except:
+            try:
+                print(obj.category.section.project.id)
+                return obj.category.section.project.id == 1
+            except:
+                try:
+                    print(obj.section.project.id)
+                    return obj.section.project.id == 1
+                except:
+                    try:
+                        print(obj.project.id)
+                        return obj.project.id == 1
+                    except:
+                        return False

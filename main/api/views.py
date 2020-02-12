@@ -4,25 +4,36 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from main.models import *
 from main.api.serializers import *
-from users.api.serializers import MyTokenObtainPairSerializer
 from main.api.permissions import *
 
-class TeamsViewSet(ViewSet):
-    def list(self, request):
+class GenericModelViewSet(ModelViewSet):
+    def get_permissions(self):
+        try:
+            return [permission() for permission in self.permission_classes_by_action[self.action]]
+        except KeyError:
+            return [permission() for permission in self.permission_classes]
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+class TeamsViewSet(GenericModelViewSet):
+    queryset = Teams.objects.all()
+    serializer_class = TeamsSerializer
+    permission_classes_by_action = {}
+
+    def list(self, request, **kwargs):
         queryset = TeamMembers.objects.filter(user_id=request.user.id)
         serializer = UsersTeamsSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, **kwargs):
         queryset = TeamProjects.objects.filter(team=pk)
         serialized = TeamsProjectsSerializer(queryset, many=True)
-        print(request.user_meta)
-        token = MyTokenObtainPairSerializer.get_token(request.user)
-        token['current_team'] = pk
-        # request.user_meta['current_team'] = pk
-        return Response(serialized.data, token)
+        return Response(serialized.data)
 
-    def create(self, request):
+    def create(self, request, **kwargs):
         data = request.data
         role = Roles.objects.get(name='admin')
         serialized = TeamsSerializer(data=data)
@@ -41,136 +52,22 @@ class TeamsViewSet(ViewSet):
         else:
             return Response(serialized.errors, status=201)
 
-    def update(self, request, pk=None):
-        inst = Teams.objects.get(pk=pk)
-        data = request.data
-        serialized = TeamsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
+class RolesViewSet(GenericModelViewSet):
+    queryset = Roles.objects.all()
+    serializer_class = RolesSerializer
+    permission_classes_by_action = {}
 
-    def partial_update(self, request, pk=None):
-        inst = Teams.objects.get(pk=pk)
-        data = request.data
-        serialized = TeamsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
+class TeamMembersViewSet(GenericModelViewSet):
+    queryset = TeamMembers.objects.all()
+    serializer_class = TeamMembersSerializer
+    permission_classes_by_action = {}
 
-    def destroy(self, request, pk=None):
-        team = Teams.objects.get(pk=pk)
-        team.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class ProjectsViewSet(GenericModelViewSet):
+    queryset = Projects.objects.all()
+    serializer_class = ProjectsSerializer
+    permission_classes_by_action = {}
 
-class RolesViewSet(ViewSet):
-    def list(self, request):
-        queryset = Roles.objects.all()
-        serializer = RolesSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Roles.objects.all()
-        role = get_object_or_404(queryset, pk=pk)
-        serializer = RolesSerializer(role)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = RolesSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = Roles.objects.get(pk=pk)
-        data = request.data
-        serialized = RolesSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = Roles.objects.get(pk=pk)
-        data = request.data
-        serialized = RolesSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        role = Roles.objects.get(pk=pk)
-        role.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class TeamMembersViewSet(ViewSet):
-    def list(self, request):
-        queryset = TeamMembers.objects.all()
-        serializer = TeamMembersSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = TeamMembers.objects.all()
-        team_member = get_object_or_404(queryset, pk=pk)
-        serializer = TeamMembersSerializer(team_member)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = TeamMembersSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = TeamMembers.objects.get(pk=pk)
-        data = request.data
-        serialized = TeamMembersSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = TeamMembers.objects.get(pk=pk)
-        data = request.data
-        serialized = TeamMembersSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        team_member = TeamMembers.objects.get(pk=pk)
-        team_member.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class ProjectsViewSet(ViewSet):
-    def list(self, request):
-        queryset = Projects.objects.all()
-        serializer = ProjectsSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Projects.objects.all()
-        project = get_object_or_404(queryset, pk=pk)
-        serializer = ProjectsSerializer(project)
-        return Response(serializer.data)
-
-    def create(self, request):
+    def create(self, request, **kwargs):
         description = request.data['description']
         name = request.data['name']
         team_id = request.data['teamID']
@@ -189,313 +86,34 @@ class ProjectsViewSet(ViewSet):
         else:
             return Response(serialized.errors, status=201)
 
-    def update(self, request, pk=None):
-        inst = Projects.objects.get(pk=pk)
-        data = request.data
-        serialized = ProjectsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
+class TeamProjectsViewSet(GenericModelViewSet):
+    queryset = TeamProjects.objects.all()
+    serializer_class = TeamProjectsSerializer
+    permission_classes_by_action = {}
 
-    def partial_update(self, request, pk=None):
-        inst = Projects.objects.get(pk=pk)
-        data = request.data
-        serialized = ProjectsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
+class SectionsViewSet(GenericModelViewSet):
+    queryset = Sections.objects.all()
+    serializer_class = SectionsSerializer
+    permission_classes_by_action = {}
 
-    def destroy(self, request, pk=None):
-        project = Projects.objects.get(pk=pk)
-        project.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class CategoriesViewSet(GenericModelViewSet):
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+    permission_classes_by_action = {}
 
-class TeamProjectsViewSet(ViewSet):
-    def list(self, request):
-        queryset = TeamProjects.objects.all()
-        serializer = TeamProjectsSerializer(queryset, many=True)
-        return Response(serializer.data)
+class ElementsViewSet(GenericModelViewSet):
+    queryset = Elements.objects.all()
+    serializer_class = ElementsSerializer
+    permission_classes_by_action = {}
 
-    def retrieve(self, request, pk=None):
-        queryset = TeamProjects.objects.all()
-        team_project = get_object_or_404(queryset, pk=pk)
-        serializer = TeamProjectsSerializer(team_project)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = TeamProjectsSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = TeamProjects.objects.get(pk=pk)
-        data = request.data
-        serialized = TeamProjectsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = TeamProjects.objects.get(pk=pk)
-        data = request.data
-        serialized = TeamProjectsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        team_project = TeamProjects.objects.get(pk=pk)
-        team_project.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class SectionsViewSet(ViewSet):
-    def list(self, request):
-        queryset = Sections.objects.all()
-        serializer = SectionsSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Sections.objects.all()
-        section = get_object_or_404(queryset, pk=pk)
-        serializer = SectionsSerializer(section)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = SectionsSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = Sections.objects.get(pk=pk)
-        data = request.data
-        serialized = SectionsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = Sections.objects.get(pk=pk)
-        data = request.data
-        serialized = SectionsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        section = Sections.objects.get(pk=pk)
-        section.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class CategoriesViewSet(ViewSet):
-    def list(self, request):
-        queryset = Categories.objects.all()
-        serializer = CategoriesSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Categories.objects.all()
-        category = get_object_or_404(queryset, pk=pk)
-        serializer = CategoriesSerializer(category)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = CategoriesSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = Categories.objects.get(pk=pk)
-        data = request.data
-        serialized = CategoriesSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = Categories.objects.get(pk=pk)
-        data = request.data
-        serialized = CategoriesSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        category = Categories.objects.get(pk=pk)
-        category.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class ElementsViewSet(ViewSet):
-    def list(self, request):
-        queryset = Elements.objects.all()
-        serializer = ElementsSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Elements.objects.all()
-        element = get_object_or_404(queryset, pk=pk)
-        serializer = ElementsSerializer(element)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = ElementsSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = Elements.objects.get(pk=pk)
-        data = request.data
-        serialized = ElementsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = Elements.objects.get(pk=pk)
-        data = request.data
-        serialized = ElementsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        element = Elements.objects.get(pk=pk)
-        element.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class ItemsViewSet(ModelViewSet):
+class ItemsViewSet(GenericModelViewSet):
+    queryset = Items.objects.all()
+    serializer_class = ItemsSerializer
     permission_classes_by_action = {
-        'retrieve': [Permm]
+        'partial_update': [Perm]
     }
 
-    def list(self, request, **kwargs):
-        queryset = Items.objects.all()
-        serializer = ItemsSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None, **kwargs):
-        queryset = Items.objects.all()
-        item = get_object_or_404(queryset, pk=pk)
-        serializer = ItemsSerializer(item)
-        return Response(serializer.data)
-
-    def create(self, request, **kwargs):
-        data = request.data
-        serialized = ItemsSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None, **kwargs):
-        inst = Items.objects.get(pk=pk)
-        data = request.data
-        serialized = ItemsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None, **kwargs):
-        inst = Items.objects.get(pk=pk)
-        data = request.data
-        serialized = ItemsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None, **kwargs):
-        item = Items.objects.get(pk=pk)
-        item.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_permissions(self):
-        try:
-            return [permission() for permission in self.permission_classes_by_action[self.action]]
-        except KeyError:
-            return [permission() for permission in self.permission_classes]
-
-class CommentsViewSet(ViewSet):
-    def list(self, request):
-        queryset = Comments.objects.all()
-        serializer = CommentsSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Comments.objects.all()
-        comment = get_object_or_404(queryset, pk=pk)
-        serializer = CommentsSerializer(comment)
-        return Response(serializer.data)
-
-    def create(self, request):
-        data = request.data
-        serialized = CommentsSerializer(data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def update(self, request, pk=None):
-        inst = Comments.objects.get(pk=pk)
-        data = request.data
-        serialized = CommentsSerializer(instance=inst, data=data)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def partial_update(self, request, pk=None):
-        inst = Comments.objects.get(pk=pk)
-        data = request.data
-        serialized = CommentsSerializer(instance=inst, data=data, partial=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=201)
-        else:
-            return Response(serialized.errors, status=201)
-
-    def destroy(self, request, pk=None):
-        comment = Comments.objects.get(pk=pk)
-        comment.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class CommentsViewSet(GenericModelViewSet):
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    permission_classes_by_action = {}
