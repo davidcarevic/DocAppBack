@@ -88,7 +88,7 @@ class Elements(models.Model):
         verbose_name_plural = "Elements"
 
 class Items(models.Model):
-    element = models.ForeignKey(Elements, on_delete=models.CASCADE)
+    element = models.ForeignKey(Elements, on_delete=models.CASCADE, db_column='element_id')
     content = JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -98,8 +98,8 @@ class Items(models.Model):
         verbose_name_plural = "Items"
 
 class Comments(models.Model):
-    element = models.ForeignKey(Elements, on_delete=models.CASCADE)
-    user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+    element = models.ForeignKey(Elements, on_delete=models.CASCADE, db_column='element_id')
+    user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, db_column='user_id')
     content = JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -107,3 +107,14 @@ class Comments(models.Model):
     class Meta:
         db_table = 'comments'
         verbose_name_plural = "Comments"
+
+class ProjectMembers(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='user_id')
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE, db_column='project_id')
+    role = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, db_column='role_id')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'project_members'
+        verbose_name_plural = "Project Members"

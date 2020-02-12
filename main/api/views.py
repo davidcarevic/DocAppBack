@@ -118,3 +118,8 @@ class CommentsViewSet(GenericModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
     permission_classes_by_action = {}
+
+class ProjectMembersViewSet(GenericModelViewSet):
+    queryset = ProjectMembers.objects.all()
+    serializer_class = ProjectMembersSerializer
+    permission_classes_by_action = {}
