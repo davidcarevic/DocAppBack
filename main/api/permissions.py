@@ -4,7 +4,7 @@ from restfw_composed_permissions.base import (BaseComposedPermission, And, Or)
 from restfw_composed_permissions.generic.components import (AllowAll, AllowOnlyAuthenticated, AllowOnlySafeHttpMethod)
 from rest_condition import ConditionalPermission, C, And, Or, Not
 from rest_framework_role_filters.viewsets import RoleFilterModelViewSet
-
+from main.models import Roles
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     message = 'You must be the owner to edit or delete this object.'
@@ -14,56 +14,61 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
         return obj.id == request.user.id
 
-
-class AdminPermission(permissions.BasePermission):
-    message = 'You have to be admin to perform this action.'
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        for inst in request.user_meta['teams']:
-            if inst['id'] == 1 and inst['role'] == 0:
-                return True
-        return False
-
-
-class EditorPermission(permissions.BasePermission):
-    message = 'You have to be editor to perform this action.'
-    safe_methods = ('GET', 'POST', 'PUT', 'PATCH')
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in self.safe_methods:
-            return True
-        for inst in request.user_meta['teams']:
-            if obj.team.id == inst['id'] and inst['role'] == 10:
-                return True
-        return False
-
-
-class ViewerPermission(permissions.BasePermission):
-    message = 'You are restricted to viewer mode.'
-
-    def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
-
-
-class Perm(permissions.BasePermission):
-    message = "NO!"
+class BaseTeamLevelPermissions(permissions.BasePermission):
+    role = None
+    message = ''
 
     def has_object_permission(self, request, view, obj):
         try:
-            return obj.element.category.section.project.id == 10
-        except:
-            try:
-                print(obj.category.section.project.id)
-                return obj.category.section.project.id == 1
-            except:
-                try:
-                    print(obj.section.project.id)
-                    return obj.section.project.id == 1
-                except:
-                    try:
-                        print(obj.project.id)
-                        return obj.project.id == 1
-                    except:
-                        return False
+            pass
+        except KeyError:
+            pass
+
+        return False
+
+class AdminProjectLevelPermissions(BaseTeamLevelPermissions):
+    message = "You need to be admin to perform this action!"
+    role = Roles.objects.get(name='admin')
+
+class EditorProjectLevelPermission(BaseTeamLevelPermissions):
+    message = "You need to have editor privileges to perform this action!"
+    role = Roles.objects.get(name='editor')
+
+class ViewerProjectLevelPermission(BaseTeamLevelPermissions):
+    message = "You are restricted to viewer mode!"
+    role = Roles.objects.get(name='viewer')
+
+class BaseProjectLevelPermission(permissions.BasePermission):
+    role = None
+    message = ''
+
+    def has_object_permission(self, request, view, obj):
+        model_name = type(obj).__name__
+
+        try:
+            if model_name == "Items":
+                return request.user_meta['project_access'][str(obj.element.category.section.project.id)] == self.role.id
+            elif model_name == "Element":
+                return request.user_meta['project_access'][str(obj.category.section.project.id)] == self.role.id
+            elif model_name == "Category":
+                return request.user_meta['project_access'][str(obj.section.project.id)] == self.role.id
+            elif model_name == "Sections":
+                return request.user_meta['project_access'][str(obj.project.id)] == self.role.id
+            elif model_name == "Projects":
+                return request.user_meta['project_access'][str(obj.id)] == self.role.id
+        except KeyError:
+            pass
+
+        return False
+
+class AdminProjectLevelPermissions(BaseProjectLevelPermission):
+    message = "You need to be admin to perform this action!"
+    role = Roles.objects.get(name='admin')
+
+class EditorProjectLevelPermission(BaseProjectLevelPermission):
+    message = "You need to have editor privileges to perform this action!"
+    role = Roles.objects.get(name='editor')
+
+class ViewerProjectLevelPermission(BaseProjectLevelPermission):
+    message = "You are restricted to viewer mode!"
+    role = Roles.objects.get(name='viewer')

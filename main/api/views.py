@@ -102,13 +102,15 @@ class CategoriesViewSet(GenericModelViewSet):
 class ElementsViewSet(GenericModelViewSet):
     queryset = Elements.objects.all()
     serializer_class = ElementsSerializer
-    permission_classes_by_action = {}
+    permission_classes_by_action = {
+        'partial_update': [AdminProjectLevelPermissions]
+    }
 
 class ItemsViewSet(GenericModelViewSet):
     queryset = Items.objects.all()
     serializer_class = ItemsSerializer
     permission_classes_by_action = {
-        'partial_update': [Perm]
+        'partial_update': [AdminProjectLevelPermissions]
     }
 
 class CommentsViewSet(GenericModelViewSet):
