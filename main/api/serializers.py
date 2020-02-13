@@ -93,3 +93,8 @@ class TeamsProjectsSerializer(ModelSerializer):
         model = TeamProjects
         fields = ['project']
         depth = 1
+
+class ProjectsPKSerializer(ModelSerializer):
+    class Meta:
+        model = ProjectMembers
+        fields = ['project', 'role']
