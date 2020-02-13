@@ -16,12 +16,12 @@ class UsersViewSet(ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes_by_action = {
-        'create': [AllowAny],
-        'list': [AdminPermission],
-        'retrieve': [AdminPermission],
-        'update': [IsOwnerOrReadOnly],
-        'partial_update': [IsOwnerOrReadOnly],
-        'destroy': [IsOwnerOrReadOnly]
+        # 'create': [AllowAny],
+        # 'list': [AdminPermission],
+        # 'retrieve': [AdminPermission],
+        # 'update': [IsOwnerOrReadOnly],
+        # 'partial_update': [IsOwnerOrReadOnly],
+        # 'destroy': [IsOwnerOrReadOnly]
     }
 
     def get_permissions(self):

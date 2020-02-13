@@ -21,12 +21,15 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         projects = ProjectMembers.objects.filter(user=user.id)
         projects = ProjectsPKSerializer(projects, many=True)
+        project_access = {}
+        for p in projects.data:
+            project_access[p['project']] = p['role']
         token = super().get_token(user)
         token['user'] = {
             'id': user.id,
             'email': user.email,
             'data': user.data,
-            'projects': projects.data,
+            'project_access': project_access,
         }
         return token
 
