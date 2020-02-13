@@ -68,21 +68,18 @@ class ProjectsViewSet(GenericModelViewSet):
     permission_classes_by_action = {}
 
     def create(self, request, **kwargs):
-        description = request.data['description']
-        name = request.data['name']
-        team_id = request.data['teamID']
-        new_data = {"name": name, "description": description}
-        serialized = ProjectsSerializer(data=new_data)
+        user_id = request.user_meta['id']
+        serialized = ProjectsSerializer(data=request.data)
         if serialized.is_valid():
             serialized.save()
-            print(serialized.data["id"])
             data = {
                 "project": serialized.data["id"],
-                "team": team_id,
+                "user": user_id,
+                "role": 0
             }
-            project_team = TeamProjectsSerializer(data=data)
-            if project_team.is_valid():
-                project_team.save()
+            project_user = ProjectMembersSerializer(data=data)
+            if project_user.is_valid():
+                project_user.save()
             return Response(serialized.data, status=201)
         else:
             return Response(serialized.errors, status=201)
@@ -123,3 +120,11 @@ class ProjectMembersViewSet(GenericModelViewSet):
     queryset = ProjectMembers.objects.all()
     serializer_class = ProjectMembersSerializer
     permission_classes_by_action = {}
+
+class UsersProjectViewSet(ViewSet):
+
+    # returns all projects for a user
+    def list(self, request, **kwargs):
+        queryset = ProjectMembers.objects.filter(user_id=request.user.id)
+        serializer = UsersProjectsSerializer(queryset, many=True)
+        return Response(serializer.data)
