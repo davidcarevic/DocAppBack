@@ -1,7 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.serializers import ModelSerializer
 from users.models import Users, EmailInvitation
-from main.api.serializers import ProjectsPKSerializer
 from main.models import ProjectMembers
 
 class UsersSerializer(ModelSerializer):
@@ -20,10 +19,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         projects = ProjectMembers.objects.filter(user=user.id)
-        projects = ProjectsPKSerializer(projects, many=True)
         project_access = {}
-        for p in projects.data:
-            project_access[p['project']] = p['role']
+        for p in projects:
+            project_access[str(p.project.id)] = p.role.id
         token = super().get_token(user)
         token['user'] = {
             'id': user.id,
