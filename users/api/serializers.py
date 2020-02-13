@@ -15,6 +15,16 @@ class UsersSerializer(ModelSerializer):
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        try:
+            instance.set_password(validated_data['password'])
+            instance.save()
+        except:
+            pass
+
+        return instance
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

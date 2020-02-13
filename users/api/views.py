@@ -2,40 +2,35 @@ from users.models import Users, EmailInvitation
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.api.serializers import UsersSerializer, MyTokenObtainPairSerializer, EmailInvitationSerializer
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from main.api.permissions import *
+from main.api.views import GenericModelViewSet
 import uuid
 from rest_framework.response import Response
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.shortcuts import get_object_or_404
+from datetime import datetime, timedelta
 
-
-class UsersViewSet(ModelViewSet):
+class UsersViewSet(GenericModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes_by_action = {
-        # 'create': [AllowAny],
-        # 'list': [AdminPermission],
-        # 'retrieve': [AdminPermission],
-        # 'update': [IsOwnerOrReadOnly],
-        # 'partial_update': [IsOwnerOrReadOnly],
-        # 'destroy': [IsOwnerOrReadOnly]
+        'create': [AllowAny],
+        'list': [IsAdminUser],
+        'retrieve': [IsAdminOrOwner],
+        'update': [IsAdminOrOwner],
+        'partial_update': [IsAdminOrOwner],
+        'destroy': [IsAdminOrOwner]
     }
-
-    def get_permissions(self):
-        try:
-            return [permission() for permission in self.permission_classes_by_action[self.action]]
-        except KeyError:
-            return [permission() for permission in self.permission_classes]
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class EmailInvitationViewSet(ModelViewSet):
+class EmailInvitationViewSet(GenericModelViewSet):
     queryset = EmailInvitation.objects.all()
     serializer_class = EmailInvitationSerializer
     permission_classes_by_action = {
@@ -45,11 +40,12 @@ class EmailInvitationViewSet(ModelViewSet):
     def retrieve(self, request, pk=None, **kwargs):
         queryset = EmailInvitation.objects.all()
         invite = get_object_or_404(queryset, token=pk)
+        if datetime.now().date() - invite.created_at.date() > timedelta(days=10):
+            return Response(status=401)
         serializer = EmailInvitationSerializer(invite)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-
         data = request.data
         data['token'] = str(uuid.uuid4())
         data['data']['user'] = request.user_meta['id']
@@ -60,13 +56,6 @@ class EmailInvitationViewSet(ModelViewSet):
             return Response(serialized.data, status=201)
         else:
             return Response(serialized.errors, status=201)
-
-    def get_permissions(self):
-        try:
-            return [permission() for permission in self.permission_classes_by_action[self.action]]
-        except KeyError:
-            return [permission() for permission in self.permission_classes]
-
 
 def send_email(request):
     print(request.data)

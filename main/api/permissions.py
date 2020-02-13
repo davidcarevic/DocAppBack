@@ -14,6 +14,12 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
         return obj.id == request.user.id
 
+class IsAdminOrOwner(permissions.BasePermission):
+    message = 'You must be the owner of this object.'
+
+    def has_object_permission(self, request, view, obj):
+        return obj.id == request.user.id or request.user.is_admin
+
 class BaseTeamLevelPermissions(permissions.BasePermission):
     role = None
     message = ''
