@@ -4,6 +4,7 @@ from restfw_composed_permissions.base import (BaseComposedPermission, And, Or)
 from restfw_composed_permissions.generic.components import (AllowAll, AllowOnlyAuthenticated, AllowOnlySafeHttpMethod)
 from rest_condition import ConditionalPermission, C, And, Or, Not
 from rest_framework_role_filters.viewsets import RoleFilterModelViewSet
+from main.models import Roles
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -22,6 +23,7 @@ class AdminPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         for inst in request.user_meta['teams']:
+            print(inst)
             if inst['id'] == 1 and inst['role'] == 0:
                 return True
         return False
@@ -46,24 +48,43 @@ class ViewerPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS
 
-
-class Perm(permissions.BasePermission):
-    message = "NO!"
+class TeamsLevelPermissions(permissions.BasePermission):
+    message = "Permission denied teams!"
 
     def has_object_permission(self, request, view, obj):
         try:
-            return obj.element.category.section.project.id == 10
+            pass
+        except:
+            pass
+
+class AdminProjectLevelPermissions(permissions.BasePermission):
+    message = "Permission denied projects!"
+
+    def has_object_permission(self, request, view, obj):
+        admin = Roles.objects.get(name="admin")
+        try:
+            for inst in request.user_meta['projects']:
+                if inst['project'] == obj.element.category.section.project.id and inst['role'] == admin.id:
+                    return True
         except:
             try:
-                print(obj.category.section.project.id)
-                return obj.category.section.project.id == 1
+                for inst in request.user_meta['projects']:
+                    if inst['project'] == obj.category.section.project.id and inst['role'] == admin.id:
+                        return True
             except:
                 try:
-                    print(obj.section.project.id)
-                    return obj.section.project.id == 1
+                    for inst in request.user_meta['projects']:
+                        if inst['project'] == obj.section.project.id and inst['role'] == admin.id:
+                            return True
                 except:
                     try:
-                        print(obj.project.id)
-                        return obj.project.id == 1
+                        for inst in request.user_meta['projects']:
+                            if inst['project'] == obj.project.id and inst['role'] == admin.id:
+                                return True
                     except:
-                        return False
+                        try:
+                            for inst in request.user_meta['projects']:
+                                if inst['project'] == obj.id and inst['role'] == admin.id:
+                                    return True
+                        except:
+                            return False

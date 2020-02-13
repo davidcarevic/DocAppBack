@@ -8,12 +8,6 @@ class TeamsSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
-class UsersTeamsPKSerializer(ModelSerializer):
-    class Meta:
-        model = TeamMembers
-        fields = ['id', 'role']
-        read_only_fields = ['id', 'role']
-
 class RolesSerializer(ModelSerializer):
     class Meta:
         model = Roles
@@ -93,3 +87,8 @@ class TeamsProjectsSerializer(ModelSerializer):
         model = TeamProjects
         fields = ['project']
         depth = 1
+
+class ProjectsPKSerializer(ModelSerializer):
+    class Meta:
+        model = ProjectMembers
+        fields = ['project', 'role']

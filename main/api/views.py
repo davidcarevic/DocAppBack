@@ -111,7 +111,7 @@ class ItemsViewSet(GenericModelViewSet):
     queryset = Items.objects.all()
     serializer_class = ItemsSerializer
     permission_classes_by_action = {
-        'partial_update': [Perm]
+        'partial_update': [AdminProjectLevelPermissions]
     }
 
 class CommentsViewSet(GenericModelViewSet):
