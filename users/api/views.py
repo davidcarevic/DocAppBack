@@ -30,7 +30,7 @@ class UsersViewSet(GenericModelViewSet):
         serialized = UsersSerializer(data={'email': data['email'], 'password': data['password']})
         if serialized.is_valid():
             serialized.save()
-            if data['data']['guid']:
+            if data['data']['guid'] is not None:
                 try:
                     serializer_team = TeamMembersSerializer(
                         data={'user': serialized.data["id"], 'team': data['data']['team'], 'role': 20})
