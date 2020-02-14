@@ -12,6 +12,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
+from main.api.serializers import TeamMembersSerializer,ProjectMembersSerializer
 
 class UsersViewSet(GenericModelViewSet):
     queryset = Users.objects.all()
@@ -24,6 +25,32 @@ class UsersViewSet(GenericModelViewSet):
         'partial_update': [IsAdminOrOwner],
         'destroy': [IsAdminOrOwner]
     }
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serialized = UsersSerializer(data={'email': data['email'], 'password': data['password']})
+        if serialized.is_valid():
+            serialized.save()
+            if data['data']['guid']:
+                try:
+                    serializer_team = TeamMembersSerializer(
+                        data={'user': serialized.data["id"], 'team': data['data']['team'], 'role': 20})
+                    if serializer_team.is_valid():
+                        serializer_team.save()
+                except:
+                    pass
+                try:
+                    serializer_project = ProjectMembersSerializer(
+                        data={'user': serialized.data["id"], 'project': data['data']['project'], 'role': 20})
+                    if serializer_project.is_valid():
+                        serializer_project.save()
+                except:
+                    pass
+                invited = EmailInvitation.objects.filter(token=data['data']['guid']).get()
+                invited.delete()
+            return Response(serialized.data, status=201)
+        else:
+            return Response(serialized.errors, status=201)
+
 
 
 class MyTokenObtainPairView(TokenObtainPairView):

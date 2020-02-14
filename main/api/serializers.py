@@ -1,6 +1,6 @@
-
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from main.models import *
+
 
 class TeamsSerializer(ModelSerializer):
     class Meta:
@@ -8,11 +8,13 @@ class TeamsSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+
 class UsersTeamsPKSerializer(ModelSerializer):
     class Meta:
         model = TeamMembers
         fields = ['id', 'role']
         read_only_fields = ['id', 'role']
+
 
 class RolesSerializer(ModelSerializer):
     class Meta:
@@ -20,11 +22,13 @@ class RolesSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+
 class TeamMembersSerializer(ModelSerializer):
     class Meta:
         model = TeamMembers
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
 
 class ProjectsSerializer(ModelSerializer):
     class Meta:
@@ -32,11 +36,13 @@ class ProjectsSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+
 class TeamProjectsSerializer(ModelSerializer):
     class Meta:
         model = TeamProjects
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
 
 class SectionsSerializer(ModelSerializer):
     class Meta:
@@ -44,11 +50,13 @@ class SectionsSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+
 class CategoriesSerializer(ModelSerializer):
     class Meta:
         model = Categories
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
 
 class ElementsSerializer(ModelSerializer):
     class Meta:
@@ -56,11 +64,13 @@ class ElementsSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+
 class ItemsSerializer(ModelSerializer):
     class Meta:
         model = Items
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
 
 class CommentsSerializer(ModelSerializer):
     class Meta:
@@ -68,11 +78,13 @@ class CommentsSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+
 class ProjectMembersSerializer(ModelSerializer):
     class Meta:
         model = ProjectMembers
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
 
 # Helping serializer
 class UsersTeamsSerializer(ModelSerializer):
@@ -81,11 +93,13 @@ class UsersTeamsSerializer(ModelSerializer):
         fields = ['team']
         depth = 1
 
+
 # Helping serializer
 class ProjectsNameSerializer(ModelSerializer):
     class Meta:
         model = Projects
         fields = ['name']
+
 
 # Helping serializer
 class TeamsProjectsSerializer(ModelSerializer):
@@ -93,6 +107,7 @@ class TeamsProjectsSerializer(ModelSerializer):
         model = TeamProjects
         fields = ['project']
         depth = 1
+
 
 # Helping serializer
 class UsersProjectsSerializer(ModelSerializer):

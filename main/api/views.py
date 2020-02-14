@@ -123,7 +123,7 @@ class ProjectMembersViewSet(GenericModelViewSet):
     serializer_class = ProjectMembersSerializer
     permission_classes_by_action = {}
 
-class UsersProjectViewSet(ViewSet):
+class UsersProjectViewSet(ViewSet): #pogresan viewset
 
     # returns all projects for a user
     def list(self, request, **kwargs):
