@@ -23,7 +23,7 @@ class Roles(models.Model):
         verbose_name_plural = "Roles"
 
 class TeamMembers(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, db_column='user_id')
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='user_id')
     team = models.ForeignKey(Teams, on_delete=models.CASCADE, db_column='team_id')
     role = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, db_column='role_id')
     created_at = models.DateTimeField(auto_now_add=True)
