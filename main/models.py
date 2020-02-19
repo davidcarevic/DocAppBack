@@ -24,7 +24,7 @@ class Roles(models.Model):
 
 class TeamMembers(models.Model):
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, db_column='user_id')
-    team = models.ForeignKey(Teams, on_delete=models.SET_NULL, null=True, db_column='team_id')
+    team = models.ForeignKey(Teams, on_delete=models.CASCADE, db_column='team_id')
     role = models.ForeignKey(Roles, on_delete=models.SET_NULL, null=True, db_column='role_id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
