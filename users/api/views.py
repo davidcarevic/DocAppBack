@@ -1,6 +1,6 @@
-from users.models import Users, EmailInvitation
+from users.models import Users, EmailInvitation, PasswordReset
 from rest_framework_simplejwt.views import TokenObtainPairView
-from users.api.serializers import UsersSerializer, MyTokenObtainPairSerializer, EmailInvitationSerializer
+from users.api.serializers import UsersSerializer, MyTokenObtainPairSerializer, EmailInvitationSerializer, PasswordResetSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import AllowAny, IsAdminUser
 from main.api.permissions import *
@@ -109,6 +109,73 @@ def send_email(request):
             'text': F'You have been invited to join Kroon',
             'url': 'http://localhost:3000/register/' + request.data['token']
         }
+
+    message.template_id = 'd-6356bd9d31b740d08ea7c633d04f874d'
+    try:
+        sg = SendGridAPIClient(os.environ['SENDGRID_API_KEY'])
+        response = sg.send(message)
+    except Exception as e:
+        print("ERROR: ", e)
+
+
+
+class PasswordResetViewSet(GenericModelViewSet):
+    queryset = PasswordReset.objects.all()
+    serializer_class = PasswordResetSerializer
+    permission_classes_by_action = {
+        'retrieve': [AllowAny],
+        'create': [AllowAny],
+        'update': [AllowAny]
+    }
+
+    def retrieve(self, request, pk=None, **kwargs):
+        queryset = PasswordReset.objects.all()
+        reset = get_object_or_404(queryset, token=pk)
+        if datetime.now().date() - reset.created_at.date() > timedelta(hours=2):
+            return Response(status=401)
+        serializer = PasswordResetSerializer(reset)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        print('request data: ', request)
+        data['token'] = str(uuid.uuid4())
+        serialized = PasswordResetSerializer(data=data)
+        if serialized.is_valid():
+            serialized.save()
+            send_pass_reset_email(request)
+            return Response(serialized.data, status=201)
+        else:
+            return Response(serialized.errors, status=201)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        new_data = {'email': data['data'], 'password': data['password']}
+        user = Users.objects.filter(email=data['data']).get()
+        user_serializer = UsersSerializer(instance=user, data=new_data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+            reset = PasswordReset.objects.filter(token=data['guid']).delete()
+            if reset:
+                return Response(user_serializer.data, 204)
+            else:
+                return Response(user_serializer.errors, 204)
+        else:
+            return Response(user_serializer.errors, 204)
+
+def send_pass_reset_email(request):
+    print(request.data)
+    message = Mail(
+        from_email="some_admin_mail@something.com",
+        to_emails=request.data['email']
+    )
+
+    message.dynamic_template_data = {
+        'subject': 'Knowledge Base | Password Reset',
+        'text': F'You have requested to reset your password, please click the button and follow further instructions \n'
+                F'If you have not requested this change, please ignore this email. \n \n',
+        'url': 'http://localhost:3000/forgot-password/' + request.data['token']
+    }
 
     message.template_id = 'd-6356bd9d31b740d08ea7c633d04f874d'
     try:

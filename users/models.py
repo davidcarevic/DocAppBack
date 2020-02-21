@@ -50,3 +50,14 @@ class EmailInvitation(models.Model):
     class Meta:
         db_table = 'email_invitations'
         verbose_name_plural = "Email Invitations"
+
+class PasswordReset(models.Model):
+    email = models.EmailField(max_length=255)
+    token = models.CharField(max_length=255, unique=True)
+    data = JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'password_reset'
+        verbose_name_plural = 'Password Reset'
