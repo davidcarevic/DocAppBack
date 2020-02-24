@@ -69,8 +69,17 @@ class ProjectsViewSet(GenericModelViewSet):
 
     def create(self, request, **kwargs):
         user_id = request.user_meta['id']
-        serialized = ProjectsSerializer(data=request.data)
+        data = request.data
+        new_data = {
+            'name': data['name'],
+            'description': data['description'],
+            'data': {
+                'image': data['image']
+            }
+        }
+        serialized = ProjectsSerializer(data=new_data)
         if serialized.is_valid():
+
             serialized.save()
             data = {
                 "project": serialized.data["id"],

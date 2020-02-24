@@ -36,6 +36,7 @@ class TeamMembers(models.Model):
 class Projects(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
+    data = JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
