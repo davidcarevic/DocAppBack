@@ -27,10 +27,35 @@ class UsersViewSet(GenericModelViewSet):
     }
     def create(self, request, *args, **kwargs):
         data = request.data
-        serialized = UsersSerializer(data={'email': data['email'], 'password': data['password']})
+        print('data je asdasdas ,', data)
+        #checks if the user is a member of the app already, if so, just adds them to the proper project/team
+        if data['data']['not_member'] is False and data['data']['not_member'] is not None:
+            queryset = Users.objects.all()
+            user = get_object_or_404(queryset, email=data['email'])
+            if data['data']['guid'] is not None:
+                try:
+                    serializer_team = TeamMembersSerializer(
+                        data={'user': user.id, 'team': data['data']['team'], 'role': 20})
+                    if serializer_team.is_valid():
+                        serializer_team.save()
+                except:
+                    pass
+                try:
+                    serializer_project = ProjectMembersSerializer(
+                        data={'user': user.id, 'project': data['data']['project'], 'role': 20})
+                    if serializer_project.is_valid():
+                        serializer_project.save()
+                except:
+                    pass
+                invited = EmailInvitation.objects.filter(token=data['data']['guid']).get()
+                invited.delete()
+            return Response(user.data, status=201)
+        # creates a new user and adds them to a project/team if they're invited
+        else:
+            serialized = UsersSerializer(data={'email': data['email'], 'password': data['password']})
         if serialized.is_valid():
             serialized.save()
-            if data['data']['guid'] is not None:
+            if data['data'].get('guid') is not None:
                 try:
                     serializer_team = TeamMembersSerializer(
                         data={'user': serialized.data["id"], 'team': data['data']['team'], 'role': 20})
@@ -74,6 +99,11 @@ class EmailInvitationViewSet(GenericModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
+        try:
+            Users.objects.filter(email=data['email']).get()
+            data['data']['not_member'] = False
+        except:
+            data['data']['not_member'] = True
         data['token'] = str(uuid.uuid4())
         data['data']['user'] = request.user_meta['id']
         serialized = EmailInvitationSerializer(data=data)
@@ -85,7 +115,7 @@ class EmailInvitationViewSet(GenericModelViewSet):
             return Response(serialized.errors, status=201)
 
 def send_email(request):
-    print(request.data)
+    print(" u mejleru , data,", request.data)
     message = Mail(
         from_email=request.user_meta['email'],
         to_emails=request.data['email']
