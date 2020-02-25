@@ -69,8 +69,17 @@ class ProjectsViewSet(GenericModelViewSet):
 
     def create(self, request, **kwargs):
         user_id = request.user_meta['id']
-        serialized = ProjectsSerializer(data=request.data)
+        data = request.data
+        new_data = {
+            'name': data['name'],
+            'description': data['description'],
+            'data': {
+                'image': data['image']
+            }
+        }
+        serialized = ProjectsSerializer(data=new_data)
         if serialized.is_valid():
+
             serialized.save()
             data = {
                 "project": serialized.data["id"],
@@ -128,4 +137,22 @@ class UsersProjectViewSet(ViewSet):
     def list(self, request, **kwargs):
         queryset = ProjectMembers.objects.filter(user_id=request.user.id)
         serializer = UsersProjectsSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class ProjectSectionsView(ViewSet):
+    def retrieve(self, request, pk=None, **kwargs):
+        queryset = Sections.objects.filter(project=pk)
+        serializer = SectionsSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class SectionCategoriesView(ViewSet):
+    def retrieve(self, request, pk=None, **kwars):
+        queryset = Categories.objects.filter(section=pk)
+        serializer = CategoriesSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class CategoryElementsView(ViewSet):
+    def retrieve(self, request, pk=None, **kwars):
+        queryset = Elements.objects.filter(category=pk)
+        serializer = ElementsSerializer(queryset, many=True)
         return Response(serializer.data)
