@@ -180,8 +180,10 @@ class PasswordResetViewSet(GenericModelViewSet):
 
     def update(self, request, *args, **kwargs):
         data = request.data
-        new_data = {'email': data['data'], 'password': data['password']}
-        user = Users.objects.filter(email=data['data']).get()
+        queryset = PasswordReset.objects.all();
+        reset_req_user = get_object_or_404(queryset, token=data['guid'])
+        new_data = {'email': reset_req_user.email, 'password': data['password']}
+        user = Users.objects.filter(email=reset_req_user.email).get()
         user_serializer = UsersSerializer(instance=user, data=new_data)
         if user_serializer.is_valid():
             user_serializer.save()
