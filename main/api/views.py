@@ -148,7 +148,11 @@ class ProjectSectionsView(ViewSet):
 class SectionCategoriesView(ViewSet):
     def retrieve(self, request, pk=None, **kwars):
         queryset = Categories.objects.filter(section=pk)
-        serializer = CategoriesSerializer(queryset, many=True)
+        serializer = CategoryElementsSerializer(queryset, many=True)
+        for inst in serializer.data:
+            print(inst['id'])
+            inst[str(inst['id'])] = inst['elements']
+            del inst['elements']
         return Response(serializer.data)
 
 class CategoryElementsView(ViewSet):

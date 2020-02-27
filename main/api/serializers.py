@@ -115,3 +115,22 @@ class UsersProjectsSerializer(ModelSerializer):
         model = ProjectMembers
         fields = ['project']
         depth = 1
+
+
+class ElementsTitleSerializer(ModelSerializer):
+    class Meta:
+        model = Elements
+        fields = ['id', 'title']
+
+class CategoryElementsSerializer(ModelSerializer):
+    elements = SerializerMethodField()
+
+    class Meta:
+        model = Categories
+        fields = ['id', 'name', 'description', 'elements']
+
+    def get_elements(self, obj):
+        queryset = Elements.objects.filter(category=obj.id)
+        serialized = ElementsTitleSerializer(queryset, many=True)
+
+        return serialized.data
