@@ -6,6 +6,7 @@ from main.models import *
 from main.api.serializers import *
 from main.api.permissions import *
 
+
 class GenericModelViewSet(ModelViewSet):
     def get_permissions(self):
         try:
@@ -17,6 +18,7 @@ class GenericModelViewSet(ModelViewSet):
         obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
+
 
 class TeamsViewSet(GenericModelViewSet):
     queryset = Teams.objects.all()
@@ -52,15 +54,18 @@ class TeamsViewSet(GenericModelViewSet):
         else:
             return Response(serialized.errors, status=201)
 
+
 class RolesViewSet(GenericModelViewSet):
     queryset = Roles.objects.all()
     serializer_class = RolesSerializer
     permission_classes_by_action = {}
 
+
 class TeamMembersViewSet(GenericModelViewSet):
     queryset = TeamMembers.objects.all()
     serializer_class = TeamMembersSerializer
     permission_classes_by_action = {}
+
 
 class ProjectsViewSet(GenericModelViewSet):
     queryset = Projects.objects.all()
@@ -93,20 +98,24 @@ class ProjectsViewSet(GenericModelViewSet):
         else:
             return Response(serialized.errors, status=201)
 
+
 class TeamProjectsViewSet(GenericModelViewSet):
     queryset = TeamProjects.objects.all()
     serializer_class = TeamProjectsSerializer
     permission_classes_by_action = {}
+
 
 class SectionsViewSet(GenericModelViewSet):
     queryset = Sections.objects.all()
     serializer_class = SectionsSerializer
     permission_classes_by_action = {}
 
+
 class CategoriesViewSet(GenericModelViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     permission_classes_by_action = {}
+
 
 class ElementsViewSet(GenericModelViewSet):
     queryset = Elements.objects.all()
@@ -115,6 +124,7 @@ class ElementsViewSet(GenericModelViewSet):
         'partial_update': [AdminProjectLevelPermissions]
     }
 
+
 class ItemsViewSet(GenericModelViewSet):
     queryset = Items.objects.all()
     serializer_class = ItemsSerializer
@@ -122,15 +132,18 @@ class ItemsViewSet(GenericModelViewSet):
         'partial_update': [AdminProjectLevelPermissions]
     }
 
+
 class CommentsViewSet(GenericModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
     permission_classes_by_action = {}
 
+
 class ProjectMembersViewSet(GenericModelViewSet):
     queryset = ProjectMembers.objects.all()
     serializer_class = ProjectMembersSerializer
     permission_classes_by_action = {}
+
 
 # returns all projects for a user
 class UsersProjectViewSet(ViewSet):
@@ -139,24 +152,44 @@ class UsersProjectViewSet(ViewSet):
         serializer = UsersProjectsSerializer(queryset, many=True)
         return Response(serializer.data)
 
+
 class ProjectSectionsView(ViewSet):
     def retrieve(self, request, pk=None, **kwargs):
         queryset = Sections.objects.filter(project=pk)
         serializer = SectionsSerializer(queryset, many=True)
         return Response(serializer.data)
 
+
 class SectionCategoriesView(ViewSet):
     def retrieve(self, request, pk=None, **kwars):
         queryset = Categories.objects.filter(section=pk)
         serializer = CategoryElementsSerializer(queryset, many=True)
         for inst in serializer.data:
-            print(inst['id'])
             inst[str(inst['id'])] = inst['elements']
             del inst['elements']
         return Response(serializer.data)
 
+
 class CategoryElementsView(ViewSet):
+    permission_classes_by_action = {
+        'partial_update': [AdminProjectLevelPermissions],
+        'update': [AdminProjectLevelPermissions]
+    }
+
     def retrieve(self, request, pk=None, **kwars):
         queryset = Elements.objects.filter(category=pk)
         serializer = ElementsSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        queryset = Elements.objects.all()
+        element = get_object_or_404(queryset, id=data['element']['id'])
+        new_data = {'title': element.title, 'description': element.description, 'tags': element.tags,
+                    'category': data['category_id']}
+        element_serializer = ElementsSerializer(instance=element, data=new_data)
+        if element_serializer.is_valid():
+            element_serializer.save()
+            return Response(element_serializer.data, 204)
+        else:
+            return Response(element_serializer.errors, 400)
