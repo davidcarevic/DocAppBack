@@ -71,6 +71,7 @@ class Categories(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = JSONField(default=dict)
 
     class Meta:
         db_table = 'categories'

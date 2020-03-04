@@ -127,7 +127,7 @@ class CategoryElementsSerializer(ModelSerializer):
 
     class Meta:
         model = Categories
-        fields = ['id', 'name', 'description', 'elements']
+        fields = ['id', 'name', 'description', 'order', 'elements']
 
     def get_elements(self, obj):
         queryset = Elements.objects.filter(category=obj.id)
