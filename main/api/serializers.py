@@ -59,10 +59,24 @@ class CategoriesSerializer(ModelSerializer):
 
 
 class ElementsSerializer(ModelSerializer):
+
     class Meta:
         model = Elements
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+class ElementsItemsSerializer(ModelSerializer):
+    items = SerializerMethodField()
+
+    class Meta:
+        model = Elements
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'items']
+
+    def get_items(self, obj):
+        queryset = Items.objects.filter(element=obj.id)
+        serialized = ItemsSerializer(queryset, many=True)
+        return serialized.data
 
 
 class ItemsSerializer(ModelSerializer):
@@ -118,6 +132,8 @@ class UsersProjectsSerializer(ModelSerializer):
 
 
 class ElementsTitleSerializer(ModelSerializer):
+    items = SerializerMethodField()
+
     class Meta:
         model = Elements
         fields = ['id', 'title']
@@ -131,6 +147,5 @@ class CategoryElementsSerializer(ModelSerializer):
 
     def get_elements(self, obj):
         queryset = Elements.objects.filter(category=obj.id)
-        serialized = ElementsTitleSerializer(queryset, many=True)
-
+        serialized = ElementsSerializer(queryset, many=True)
         return serialized.data
