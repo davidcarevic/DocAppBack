@@ -176,7 +176,6 @@ class CategoryElementsView(ViewSet):
     def retrieve(self, request, pk=None, **kwars):
         queryset = Elements.objects.filter(category=pk)
         serializer = ElementsItemsSerializer(queryset, many=True)
-        print(serializer.data)
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
