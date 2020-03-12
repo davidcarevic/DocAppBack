@@ -29,7 +29,7 @@ class UsersViewSet(GenericModelViewSet):
         data = request.data
         print('data je asdasdas ,', data)
         #checks if the user is a member of the app already, if so, just adds them to the proper project/team
-        if data['data']['not_member'] is False and data['data']['not_member'] is not None:
+        if data['data'].get('not_member') is False and data['data'].get('not_member') is not None:
             queryset = Users.objects.all()
             user = get_object_or_404(queryset, email=data['email'])
             if data['data']['guid'] is not None:
@@ -86,7 +86,8 @@ class EmailInvitationViewSet(GenericModelViewSet):
     queryset = EmailInvitation.objects.all()
     serializer_class = EmailInvitationSerializer
     permission_classes_by_action = {
-        'retrieve': [AllowAny]
+        'retrieve': [AllowAny],
+        'create': [AllowAny]
     }
 
     def retrieve(self, request, pk=None, **kwargs):
@@ -99,8 +100,8 @@ class EmailInvitationViewSet(GenericModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
+        EmailInvitation.objects.filter(email=data['email']).get()
         try:
-            Users.objects.filter(email=data['email']).get()
             data['data']['not_member'] = False
         except:
             data['data']['not_member'] = True
