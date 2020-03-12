@@ -183,7 +183,7 @@ class CategoryElementsView(ViewSet):
         queryset = Elements.objects.all()
         element = get_object_or_404(queryset, id=data['element']['id'])
         new_data = {'title': element.title, 'description': element.description, 'tags': element.tags,
-                    'category': data['category_id']}
+                    'category': data['category_id'], 'order': element.order}
         element_serializer = ElementsSerializer(instance=element, data=new_data)
         if element_serializer.is_valid():
             element_serializer.save()
