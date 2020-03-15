@@ -100,8 +100,8 @@ class EmailInvitationViewSet(GenericModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        EmailInvitation.objects.filter(email=data['email']).get()
         try:
+            Users.objects.filter(email=data['email']).get()
             data['data']['not_member'] = False
         except:
             data['data']['not_member'] = True

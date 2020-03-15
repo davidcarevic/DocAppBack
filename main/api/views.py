@@ -190,3 +190,59 @@ class CategoryElementsView(ViewSet):
             return Response(element_serializer.data, 204)
         else:
             return Response(element_serializer.errors, 400)
+
+class ReorderElementsVeiwSet(GenericModelViewSet):
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+    permission_classes_by_action = {'update': [AdminProjectLevelPermissions]}
+
+    def update(self, request, pk=None, *args, **kwargs):
+        data = request.data
+        print("DATA", data)
+        queryset = Categories.objects.all()
+        category = get_object_or_404(queryset, id=pk)
+        new_data = {'name': category.name, 'description': category.description, 'section': category.section_id,
+                    'order': data['order']}
+        category_serializer = CategoriesSerializer(instance=category, data=new_data)
+        if category_serializer.is_valid():
+            category_serializer.save()
+            return Response(category_serializer.data, 204)
+        else:
+            return Response(category_serializer.errors, 400)
+
+class ReorderItemsVeiwSet(GenericModelViewSet):
+    queryset = Elements.objects.all()
+    serializer_class = ElementsSerializer
+    permission_classes_by_action = {'update': [AdminProjectLevelPermissions]}
+
+    def update(self, request, pk=None, *args, **kwargs):
+        data = request.data
+        print("DATA", data)
+        queryset = Elements.objects.all()
+        element = get_object_or_404(queryset, id=pk)
+        new_data = {'title': element.title, 'description': element.description, 'category': element.category_id,
+                    'order': data['order']}
+        element_serializer = ElementsSerializer(instance=element, data=new_data)
+        if element_serializer.is_valid():
+            element_serializer.save()
+            return Response(element_serializer.data, 204)
+        else:
+            return Response(element_serializer.errors, 400)
+
+class ElementItemsViewSet(GenericModelViewSet):
+    permission_classes_by_action = {
+        'partial_update': [AdminProjectLevelPermissions],
+        'update': [AdminProjectLevelPermissions]
+    }
+
+    def update(self, request, pk=None, *args, **kwargs):
+        data = request.data
+        queryset = Items.objects.all()
+        item = get_object_or_404(queryset, id=pk)
+        new_data = {'element': data['element_id'], 'type': item.type}
+        item_serializer = ItemsSerializer(instance=item, data=new_data)
+        if item_serializer.is_valid():
+            item_serializer.save()
+            return Response(item_serializer.data, 204)
+        else:
+            return Response(item_serializer.errors, 400)
