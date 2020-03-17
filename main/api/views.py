@@ -162,7 +162,7 @@ class ProjectSectionsView(ViewSet):
 
 class SectionCategoriesView(ViewSet):
     def retrieve(self, request, pk=None, **kwars):
-        queryset = Categories.objects.filter(section=pk)
+        queryset = Categories.objects.filter(section=pk).order_by('id')
         serializer = CategoryElementsSerializer(queryset, many=True)
         return Response(serializer.data)
 
