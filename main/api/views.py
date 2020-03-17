@@ -185,8 +185,17 @@ class CategoryElementsView(ViewSet):
         new_data = {'title': element.title, 'description': element.description, 'tags': element.tags,
                     'category': data['category_id'], 'order': element.order}
         element_serializer = ElementsSerializer(instance=element, data=new_data)
+        category_query = Categories.objects.all()
+        category = get_object_or_404(category_query, id=data['category_id'])
+        new_order = {'name': category.name, 'description': category.description, 'section': category.section_id,
+                     'order': data['newOrder']}
+        category_serializer = CategoriesSerializer(instance=category, data=new_order)
         if element_serializer.is_valid():
             element_serializer.save()
+            if category_serializer.is_valid():
+                category_serializer.save()
+            else:
+                return Response(category_serializer.errors,400)
             return Response(element_serializer.data, 204)
         else:
             return Response(element_serializer.errors, 400)
@@ -198,7 +207,6 @@ class ReorderElementsVeiwSet(GenericModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
         data = request.data
-        print("DATA", data)
         queryset = Categories.objects.all()
         category = get_object_or_404(queryset, id=pk)
         new_data = {'name': category.name, 'description': category.description, 'section': category.section_id,
@@ -217,7 +225,6 @@ class ReorderItemsVeiwSet(GenericModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
         data = request.data
-        print("DATA", data)
         queryset = Elements.objects.all()
         element = get_object_or_404(queryset, id=pk)
         new_data = {'title': element.title, 'description': element.description, 'category': element.category_id,
@@ -241,8 +248,17 @@ class ElementItemsViewSet(GenericModelViewSet):
         item = get_object_or_404(queryset, id=pk)
         new_data = {'element': data['element_id'], 'type': item.type}
         item_serializer = ItemsSerializer(instance=item, data=new_data)
+        element_queryset = Elements.objects.all()
+        element = get_object_or_404(element_queryset, id=data['element_id'])
+        new_order = {'title': element.title, 'description': element.description, 'category': element.category_id,
+                     'order': data['newOrder']}
+        element_serializer = ElementsSerializer(instance=element, data=new_order)
         if item_serializer.is_valid():
             item_serializer.save()
+            if element_serializer.is_valid():
+                element_serializer.save()
+            else:
+                return Response(element_serializer.errors, 400)
             return Response(item_serializer.data, 204)
         else:
             return Response(item_serializer.errors, 400)
