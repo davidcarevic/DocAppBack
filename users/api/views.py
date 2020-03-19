@@ -29,7 +29,7 @@ class UsersViewSet(GenericModelViewSet):
         data = request.data
         print('data je asdasdas ,', data)
         #checks if the user is a member of the app already, if so, just adds them to the proper project/team
-        if data['data'].get('not_member') is False and data['data'].get('not_member') is not None:
+        if data['data'].get('not_member') is False:
             queryset = Users.objects.all()
             user = get_object_or_404(queryset, email=data['email'])
             if data['data']['guid'] is not None:
