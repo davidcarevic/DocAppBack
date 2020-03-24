@@ -84,7 +84,7 @@ class Elements(models.Model):
     tags = JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    order = JSONField(default=[])
+    order = JSONField(default=dict)
 
     class Meta:
         db_table = 'elements'
@@ -92,6 +92,7 @@ class Elements(models.Model):
 
 class Items(models.Model):
     element = models.ForeignKey(Elements, on_delete=models.CASCADE, db_column='element_id')
+    column = models.IntegerField(default=1)
     type = models.CharField(max_length=100)
     content = JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
