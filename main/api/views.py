@@ -246,7 +246,7 @@ class ElementItemsViewSet(GenericModelViewSet):
         data = request.data
         queryset = Items.objects.all()
         item = get_object_or_404(queryset, id=pk)
-        new_data = {'element': data['element_id'], 'type': item.type}
+        new_data = {'element': data['element_id'], 'type': item.type, 'column': data['column']}
         item_serializer = ItemsSerializer(instance=item, data=new_data)
         element_queryset = Elements.objects.all()
         element = get_object_or_404(element_queryset, id=data['element_id'])
