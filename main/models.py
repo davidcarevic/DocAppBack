@@ -84,7 +84,7 @@ class Elements(models.Model):
     tags = JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    order = JSONField(default=dict)
+    order = JSONField(default=[])
 
     class Meta:
         db_table = 'elements'
