@@ -72,6 +72,17 @@ class ProjectsViewSet(GenericModelViewSet):
     serializer_class = ProjectsSerializer
     permission_classes_by_action = {}
 
+    def retrieve(self, request, pk=None, **kwargs):
+        project = Projects.objects.get(pk=pk)
+        serialized_project = ProjectsSerializer(project)
+        data = serialized_project.data
+        for key in request.user_meta['project_access']:
+            if serialized_project.data['id'] == int(key):
+                role = Roles.objects.get(pk=request.user_meta['project_access'][key])
+                serialized_role = RolesSerializer(role)
+                data['role'] = serialized_role.data['name']
+        return Response(data, status=201)
+
     def create(self, request, **kwargs):
         user_id = request.user_meta['id']
         data = request.data
