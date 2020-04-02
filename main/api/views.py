@@ -75,12 +75,12 @@ class ProjectsViewSet(GenericModelViewSet):
     def retrieve(self, request, pk=None, **kwargs):
         project = Projects.objects.get(pk=pk)
         serialized_project = ProjectsSerializer(project)
+        project_role = ProjectMembers.objects.get(project=serialized_project.data['id'], user=request.user_meta['id'])
+        serialized_project_role = ProjectMembersSerializer(project_role)
+        role = Roles.objects.get(pk=serialized_project_role.data['role'])
+        serialized_role = RolesSerializer(role)
         data = serialized_project.data
-        for key in request.user_meta['project_access']:
-            if serialized_project.data['id'] == int(key):
-                role = Roles.objects.get(pk=request.user_meta['project_access'][key])
-                serialized_role = RolesSerializer(role)
-                data['role'] = serialized_role.data['name']
+        data['role'] = serialized_role.data['name']
         return Response(data, status=201)
 
     def create(self, request, **kwargs):
