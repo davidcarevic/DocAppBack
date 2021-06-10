@@ -6,7 +6,7 @@ chardet==3.0.4
 coreapi==2.3.3
 coreschema==0.0.4
 curtsies==0.3.1
-Django==3.0.3
+Django==3.1.12
 django-cors-headers==3.2.1
 django-environ==0.4.5
 django-environ-plus==0.0.3
